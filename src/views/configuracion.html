@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuracion | Dulcería Lupita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-main:#f8fafc;--bg-card:#112240;--bg-sidebar:#1a3560;--accent:#2d6aad;--accent2:#0d9488;--border:rgba(45,106,173,0.20);--text-main:#1e293b;--text-muted:#64748b;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background-color:var(--bg-main);color:var(--text-main);}
+        .sidebar-active{background-color:var(--accent);color:#ffffff;box-shadow:0 4px 20px rgba(45,106,173,0.45);}
+        .glass-card{background:#ffffff;border:1px solid #e2e8f0;box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+        .tab-content{display:none;}
+        .tab-content.active{display:block;animation:fadeIn .4s ease-out;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .legal-textarea{width:100%;min-height:380px;padding:1.25rem 1.5rem;border-radius:1.5rem;border:2px solid #e2e8f0;background:#f8fafc;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;line-height:1.7;color:#1e293b;resize:vertical;outline:none;transition:border-color .2s;}
+        .legal-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,106,173,0.20);}
+        .legal-preview{display:none;min-height:380px;padding:1.25rem 1.5rem;border-radius:1.5rem;border:2px solid #e2e8f0;background:#fff;font-size:.875rem;line-height:1.8;color:#1e293b;white-space:pre-wrap;overflow-y:auto;}
+        .legal-preview.visible{display:block;}
+        .badge-saved{display:inline-block;background:#d1fae5;color:#065f46;font-size:.7rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:.05em;}
+        .modal-backdrop{display:none;background:rgba(13,27,46,0.85);backdrop-filter:blur(6px);}
+        #toast{position:fixed;bottom:2rem;right:7rem;z-index:9999;padding:.75rem 1.5rem;border-radius:1rem;font-weight:700;font-size:.85rem;transform:translateY(4rem);opacity:0;transition:all .3s ease;pointer-events:none;}
+        #toast.show{transform:translateY(0);opacity:1;}
+        #toast.ok{background:#1d6a3a;color:#a7f3c2;}
+        #toast.err{background:#7f1d1d;color:#fca5a5;}
+        input:focus,select:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(45,106,173,0.25);}
+        table{width:100%;border-collapse:collapse;}
+        th{background:#f1f5f9;font-weight:700;color:var(--text-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;padding:10px 16px;text-align:left;}
+        td{padding:12px 16px;border-bottom:1px solid #f1f5f9;font-size:.875rem;}
+        tr:last-child td{border-bottom:none;}
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+<!-- SIDEBAR -->
+<aside class="w-72 flex flex-col p-6 shrink-0" style="background:var(--bg-sidebar);border-right:1px solid var(--border);">
+    <div class="mb-10 px-2">
+        <h1 class="text-2xl font-extrabold tracking-tighter" style="color:#fff;">
+            DULCERIA LUPITA
+            <span class="text-xs block tracking-[.3em] uppercase opacity-70" style="color:var(--accent2);">Configuracion</span>
+        </h1>
+    </div>
+    <nav class="space-y-2 flex-1">
+        <button onclick="openTab(event,'sistema')"    class="tab-btn sidebar-active w-full flex items-center gap-3 px-4 py-4 rounded-2xl font-bold transition-all text-sm text-white"><span>&#9881;</span> Sistema</button>
+        <button onclick="openTab(event,'usuarios')"   class="tab-btn w-full flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all text-sm" style="color:var(--text-muted);"><span>&#128101;</span> Personal</button>
+        <button onclick="openTab(event,'sucursales')" class="tab-btn w-full flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all text-sm" style="color:var(--text-muted);"><span>&#127978;</span> Sucursales</button>
+        <button onclick="openTab(event,'categorias')" class="tab-btn w-full flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all text-sm" style="color:var(--text-muted);"><span>&#127991;</span> Inventario</button>
+        <button onclick="openTab(event,'seguridad')"  class="tab-btn w-full flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all text-sm" style="color:var(--text-muted);"><span>&#128737;</span> Roles</button>
+        <button onclick="openTab(event,'legal')"      class="tab-btn w-full flex items-center gap-3 px-4 py-4 rounded-xl font-bold transition-all text-sm" style="color:var(--text-muted);"><span>&#128220;</span> Legal</button>
+    </nav>
+    <div class="space-y-3 mt-4">
+        <a href="/admin" class="block w-full text-center py-3 rounded-xl font-bold transition-all text-sm" style="background:rgba(45,106,173,0.15);color:var(--text-muted);border:1px solid var(--border);">&#8592; Menu Principal</a>
+        <div id="sidebar-user" class="p-4 rounded-xl flex items-center gap-3" style="background:rgba(45,106,173,0.15);border:1px solid var(--border);">
+            <div id="user-avatar" class="w-10 h-10 rounded-lg flex items-center justify-center font-black text-white text-sm" style="background:var(--accent);">--</div>
+            <div>
+                <p class="text-[10px] font-black uppercase" style="color:var(--accent2);">Sesion Activa</p>
+                <p id="user-nombre" class="text-xs font-bold text-white">--</p>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-8 overflow-y-auto" style="background:#f1f5f9;">
+
+    <!-- TAB: SISTEMA -->
+    <section id="sistema" class="tab-content active">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-black text-slate-800 mb-2">Sistema</h2>
+            <p class="font-semibold mb-8" style="color:var(--text-muted);">Parametros de la tienda principal.</p>
+            <div id="kpis" class="grid grid-cols-4 gap-4 mb-8">
+                <div class="glass-card rounded-3xl p-6 text-center"><div class="text-3xl font-black" style="color:var(--accent2);" id="kpi-productos">--</div><div class="text-xs font-bold mt-1 uppercase tracking-widest" style="color:var(--text-muted);">Productos</div></div>
+                <div class="glass-card rounded-3xl p-6 text-center"><div class="text-3xl font-black text-blue-500" id="kpi-proveedores">--</div><div class="text-xs font-bold mt-1 uppercase tracking-widest" style="color:var(--text-muted);">Proveedores</div></div>
+                <div class="glass-card rounded-3xl p-6 text-center"><div class="text-3xl font-black text-purple-500" id="kpi-usuarios">--</div><div class="text-xs font-bold mt-1 uppercase tracking-widest" style="color:var(--text-muted);">Usuarios</div></div>
+                <div class="glass-card rounded-3xl p-6 text-center"><div class="text-3xl font-black text-orange-500" id="kpi-bajostock">--</div><div class="text-xs font-bold mt-1 uppercase tracking-widest" style="color:var(--text-muted);">Bajo Stock</div></div>
+            </div>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="col-span-2 glass-card rounded-[3rem] p-10 space-y-6">
+                    <h3 class="font-black uppercase tracking-widest text-xs" style="color:var(--text-muted);">Datos de la tienda principal</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-slate-400 ml-4 block mb-2">Nombre del Negocio</label>
+                            <input type="text" id="cfg-nombre" placeholder="Dulcería Lupita" class="w-full px-6 py-4 rounded-2xl border-2 border-transparent bg-white outline-none font-bold shadow-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black uppercase text-slate-400 ml-4 block mb-2">Contacto / Telefono</label>
+                            <input type="text" id="cfg-contacto" placeholder="555-000-0000" class="w-full px-6 py-4 rounded-2xl border-2 border-transparent bg-white outline-none font-bold shadow-sm">
+                        </div>
+                    </div>
+                    <button onclick="guardarConfiguracion()" class="px-12 py-5 rounded-full font-black uppercase tracking-widest transition-all shadow-xl" style="background:var(--accent2);color:#fff;">Guardar Cambios</button>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass-card rounded-[2.5rem] p-8" style="border-top:8px solid var(--accent);">
+                        <h4 class="text-sm font-black mb-3 text-slate-800">SOPORTE TECNICO</h4>
+                        <p class="text-xs text-slate-400 mb-1">Encargado del sistema</p>
+                        <p class="text-xs font-bold" style="color:var(--accent);">soporte@dulcerialupita.com</p>
+                    </div>
+                    <div class="glass-card rounded-[2.5rem] p-8" style="border-top:8px solid var(--accent2);">
+                        <h4 class="text-sm font-black mb-3 text-slate-800">VERSION</h4>
+                        <p class="text-xs text-slate-400">Sistema de Inventario</p>
+                        <p class="text-xs font-bold mt-1" style="color:var(--accent2);">v2.0 — Dulcería Lupita</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: PERSONAL / USUARIOS -->
+    <section id="usuarios" class="tab-content">
+        <div class="max-w-6xl mx-auto">
+            <div id="banner-solo-duena" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:1rem;padding:12px 20px;margin-bottom:16px;align-items:center;gap:10px;">
+                <span>&#9888;&#65039;</span>
+                <span style="font-weight:700;font-size:.85rem;color:#92400e;">Solo la <strong>Dueña</strong> puede registrar, modificar o eliminar usuarios.</span>
+            </div>
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-5xl font-black text-slate-800 mb-2">Personal</h2>
+                    <p class="font-semibold" style="color:var(--text-muted);">Gestion de credenciales y perfiles activos.</p>
+                </div>
+                <button id="btnNuevoUsuario" data-solo-duena onclick="abrirModalUsuario()" class="px-6 py-3 rounded-full font-black text-sm text-white shadow transition-all" style="background:var(--accent2);">+ Nuevo Usuario</button>
+            </header>
+            <div class="glass-card rounded-3xl overflow-hidden">
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th><th>Correo</th><th class="text-right">Acciones</th></tr></thead>
+                    <tbody id="tbodyUsuarios"><tr><td colspan="5" class="text-center py-10" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: SUCURSALES -->
+    <section id="sucursales" class="tab-content">
+        <div class="max-w-6xl mx-auto">
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-5xl font-black text-slate-800 mb-2">Sucursales</h2>
+                    <p class="font-semibold" style="color:var(--text-muted);">Tiendas y bodegas del negocio.</p>
+                </div>
+                <button onclick="abrirModalSucursal()" class="px-6 py-3 rounded-full font-black text-sm text-white shadow transition-all" style="background:var(--accent2);">+ Nueva Sucursal</button>
+            </header>
+            <div id="listaSucursales" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-3xl p-8 text-center" style="color:var(--text-muted);">Cargando...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: CATEGORIAS -->
+    <section id="categorias" class="tab-content">
+        <div class="max-w-6xl mx-auto">
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-5xl font-black text-slate-800 mb-2">Inventario</h2>
+                    <p class="font-semibold" style="color:var(--text-muted);">Clasificacion de productos del catalogo.</p>
+                </div>
+                <button onclick="abrirModalCategoría()" class="px-6 py-3 rounded-full font-black text-sm text-white shadow transition-all" style="background:var(--accent2);">+ Nueva Categoría</button>
+            </header>
+            <div class="glass-card rounded-3xl overflow-hidden">
+                <table>
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Descripcion</th><th class="text-right">Acciones</th></tr></thead>
+                    <tbody id="tbodyCategorías"><tr><td colspan="4" class="text-center py-10" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: ROLES / SEGURIDAD -->
+    <section id="seguridad" class="tab-content">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-5xl font-black text-slate-800 mb-2">Roles del Sistema</h2>
+            <p class="font-semibold mb-8" style="color:var(--text-muted);">Descripcion de los permisos de cada rol.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-3xl p-8" style="border-top:6px solid #7c3aed;">
+                    <h3 class="text-xl font-black text-slate-800 mb-2">&#128081; Dueña</h3>
+                    <p class="text-sm mb-4" style="color:var(--text-muted);">Acceso total al sistema.</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Registrar y eliminar usuarios</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Modificar roles</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Ver todos los modulos</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Configuracion del sistema</li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-3xl p-8" style="border-top:6px solid var(--accent);">
+                    <h3 class="text-xl font-black text-slate-800 mb-2">&#128188; Administrativo</h3>
+                    <p class="text-sm mb-4" style="color:var(--text-muted);">Gestion operativa del negocio.</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Inventario completo</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Entradas y salidas</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Devoluciones</li>
+                        <li class="flex items-center gap-2"><span style="color:#ef4444;">&#10007;</span> Gestionar usuarios</li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-3xl p-8" style="border-top:6px solid var(--accent2);">
+                    <h3 class="text-xl font-black text-slate-800 mb-2">&#128196; Capturista</h3>
+                    <p class="text-sm mb-4" style="color:var(--text-muted);">Registro de movimientos de inventario.</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Registrar entradas</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Registrar salidas</li>
+                        <li class="flex items-center gap-2"><span style="color:#ef4444;">&#10007;</span> Eliminar registros</li>
+                        <li class="flex items-center gap-2"><span style="color:#ef4444;">&#10007;</span> Configuracion</li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-3xl p-8" style="border-top:6px solid #f59e0b;">
+                    <h3 class="text-xl font-black text-slate-800 mb-2">&#128230; Jefe Almacen</h3>
+                    <p class="text-sm mb-4" style="color:var(--text-muted);">Control fisico del inventario.</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Ver inventario</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Registrar ubicaciones</li>
+                        <li class="flex items-center gap-2"><span style="color:#16a34a;">&#10003;</span> Ver notificaciones</li>
+                        <li class="flex items-center gap-2"><span style="color:#ef4444;">&#10007;</span> Modificar precios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB: LEGAL -->
+    <section id="legal" class="tab-content">
+        <div class="max-w-6xl mx-auto">
+            <div id="banner-solo-duena-legal" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:1rem;padding:12px 20px;margin-bottom:16px;align-items:center;gap:10px;">
+                <span>&#9888;&#65039;</span>
+                <span style="font-weight:700;font-size:.85rem;color:#92400e;">Solo la <strong>Dueña</strong> puede editar, guardar o limpiar los documentos legales.</span>
+            </div>
+            <header class="mb-8">
+                <h2 class="text-5xl font-black text-slate-800 mb-2">Documentos Legales</h2>
+                <p class="font-semibold" style="color:var(--text-muted);"></p>
+            </header>
+
+            <!-- GRID DE DOS COLUMNAS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- POLITICAS DE PRIVACIDAD -->
+                <div class="glass-card rounded-[2.5rem] p-8 flex flex-col gap-4" style="border-top:8px solid var(--accent);">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800">&#128274; Politicas de Privacidad</h3>
+                            <p class="text-xs mt-1" style="color:var(--text-muted);">Como se maneja la informacion de los usuarios.</p>
+                        </div>
+                        <span id="badge-privacidad" class="badge-saved" style="display:none;">&#10003; Guardado</span>
+                    </div>
+
+                    <!-- TOOLBAR -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="toggleModo('privacidad')" id="btn-modo-privacidad"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:rgba(45,106,173,0.12);color:var(--accent);">
+                            &#128065; Vista previa
+                        </button>
+                        <button onclick="copiarTexto('privacidad')"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:#f1f5f9;color:var(--text-muted);">
+                            &#128203; Copiar
+                        </button>
+                        <button id="btn-limpiar-privacidad" onclick="limpiarTexto('privacidad')"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:rgba(239,68,68,0.08);color:#ef4444;">
+                            &#128465; Limpiar
+                        </button>
+                    </div>
+
+                    <!-- EDITOR -->
+                    <textarea id="texto-privacidad" class="legal-textarea"
+                        placeholder="Pega aqui el contenido de tu documento de Politicas de Privacidad desde Word...&#10;&#10;Ejemplo:&#10;1. INFORMACION QUE RECOPILAMOS&#10;Esta politica describe como Dulceria Lupita recopila..."></textarea>
+
+                    <!-- PREVIEW -->
+                    <div id="preview-privacidad" class="legal-preview"></div>
+
+                    <!-- FOOTER INFO -->
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="fecha-privacidad" class="text-[10px] font-bold" style="color:var(--text-muted);">Sin guardar</span>
+                        <button id="btn-guardar-privacidad" onclick="guardarLegal('privacidad')"
+                            class="px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow transition-all"
+                            style="background:var(--accent);color:#fff;">
+                            Guardar &#10003;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TERMINOS Y CONDICIONES -->
+                <div class="glass-card rounded-[2.5rem] p-8 flex flex-col gap-4" style="border-top:8px solid var(--accent2);">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800">&#128203; Terminos y Condiciones</h3>
+                            <p class="text-xs mt-1" style="color:var(--text-muted);">Reglas de uso aceptadas al registrarse en el sistema.</p>
+                        </div>
+                        <span id="badge-terminos" class="badge-saved" style="display:none;">&#10003; Guardado</span>
+                    </div>
+
+                    <!-- TOOLBAR -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="toggleModo('terminos')" id="btn-modo-terminos"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:rgba(13,148,136,0.12);color:var(--accent2);">
+                            &#128065; Vista previa
+                        </button>
+                        <button onclick="copiarTexto('terminos')"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:#f1f5f9;color:var(--text-muted);">
+                            &#128203; Copiar
+                        </button>
+                        <button id="btn-limpiar-terminos" onclick="limpiarTexto('terminos')"
+                            class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                            style="background:rgba(239,68,68,0.08);color:#ef4444;">
+                            &#128465; Limpiar
+                        </button>
+                    </div>
+
+                    <!-- EDITOR -->
+                    <textarea id="texto-terminos" class="legal-textarea"
+                        placeholder="Pega aqui el contenido de tus Terminos y Condiciones desde Word...&#10;&#10;Ejemplo:&#10;1. ACEPTACION DE LOS TERMINOS&#10;Al acceder al sistema de Dulceria Lupita..."></textarea>
+
+                    <!-- PREVIEW -->
+                    <div id="preview-terminos" class="legal-preview"></div>
+
+                    <!-- FOOTER INFO -->
+                    <div class="flex items-center justify-between mt-2">
+                        <span id="fecha-terminos" class="text-[10px] font-bold" style="color:var(--text-muted);">Sin guardar</span>
+                        <button id="btn-guardar-terminos" onclick="guardarLegal('terminos')"
+                            class="px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow transition-all"
+                            style="background:var(--accent2);color:#fff;">
+                            Guardar &#10003;
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /grid -->
+
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL USUARIO -->
+<div id="modalUsuario" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none">
+    <div class="w-full max-w-md rounded-[3rem] p-12 shadow-2xl" style="background:#fff;border:1px solid #e2e8f0;">
+        <h3 class="text-3xl font-black text-slate-800 mb-1" id="modalUsuarioTitle">Nuevo Usuario</h3>
+        <p class="text-xs font-bold uppercase tracking-widest mb-8" style="color:var(--accent2);">Gestion de Personal</p>
+        <input type="hidden" id="u-id">
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Nombre</label>
+                <input type="text" id="u-nombre" placeholder="Nombre completo" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Correo</label>
+                <input type="email" id="u-correo" placeholder="correo@ejemplo.com" maxlength="50" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Rol en el Sistema</label>
+                <select id="u-rol" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Capturista">Capturista</option>
+                    <option value="Jefe Almacen">Jefe Almacen</option>
+                    <option value="Duena">Duena</option>
+                </select>
+            </div>
+            <div id="campoPassword">
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Contrasena</label>
+                <input type="password" id="u-pass" placeholder="Minimo 6 caracteres" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+        </div>
+        <div class="flex gap-4 mt-10">
+            <button onclick="cerrarModal('modalUsuario')" class="flex-1 py-4 font-black uppercase text-[11px] tracking-widest" style="color:var(--text-muted);">Cancelar</button>
+            <button onclick="guardarUsuario()" id="btnGuardarUsuario" class="flex-[2] py-5 rounded-3xl font-black uppercase text-[11px] tracking-[.2em] shadow-xl" style="background:var(--accent2);color:#fff;">Registrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SUCURSAL -->
+<div id="modalSucursal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none">
+    <div class="w-full max-w-md rounded-[3rem] p-12 shadow-2xl" style="background:#fff;border:1px solid #e2e8f0;">
+        <h3 class="text-3xl font-black text-slate-800 mb-1" id="modalSucursalTitle">Nueva Sucursal</h3>
+        <p class="text-xs font-bold uppercase tracking-widest mb-8" style="color:var(--accent2);">Gestion de Tiendas</p>
+        <input type="hidden" id="s-id">
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Nombre de la Sucursal</label>
+                <input type="text" id="s-nombre" placeholder="Dulcería Lupita Norte" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Telefono de Contacto</label>
+                <input type="text" id="s-contacto" placeholder="555-000-0000" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+        </div>
+        <div class="flex gap-4 mt-10">
+            <button onclick="cerrarModal('modalSucursal')" class="flex-1 py-4 font-black uppercase text-[11px] tracking-widest" style="color:var(--text-muted);">Cancelar</button>
+            <button onclick="guardarSucursal()" class="flex-[2] py-5 rounded-3xl font-black uppercase text-[11px] tracking-[.2em] shadow-xl" style="background:var(--accent2);color:#fff;">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CATEGORIA -->
+<div id="modalCategoría" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none">
+    <div class="w-full max-w-md rounded-[3rem] p-12 shadow-2xl" style="background:#fff;border:1px solid #e2e8f0;">
+        <h3 class="text-3xl font-black text-slate-800 mb-1" id="modalCategoriaTitle">Nueva Categoría</h3>
+        <p class="text-xs font-bold uppercase tracking-widest mb-8" style="color:var(--accent2);">Clasificacion de Productos</p>
+        <input type="hidden" id="c-id">
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Nombre de la Categoría</label>
+                <input type="text" id="c-nombre" placeholder="ej. Dulces, Higiene, Bebidas..." class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+            <div>
+                <label class="text-[10px] font-black uppercase tracking-[.2em] ml-4 block mb-1" style="color:var(--text-muted);">Descripcion</label>
+                <input type="text" id="c-desc" placeholder="Descripcion breve" class="w-full px-6 py-4 rounded-2xl outline-none font-bold" style="background:#f8fafc;border:1px solid #cbd5e1;color:#1e293b;">
+            </div>
+        </div>
+        <div class="flex gap-4 mt-10">
+            <button onclick="cerrarModal('modalCategoría')" class="flex-1 py-4 font-black uppercase text-[11px] tracking-widest" style="color:var(--text-muted);">Cancelar</button>
+            <button onclick="guardarCategoría()" class="flex-[2] py-5 rounded-3xl font-black uppercase text-[11px] tracking-[.2em] shadow-xl" style="background:var(--accent2);color:#fff;">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// UTILIDADES
+async function api(url, method, body) {
+    method = method || 'GET';
+    var opts = { method: method, headers: {} };
+    if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+    var res = await fetch(url, opts);
+    // Sesión expirada → redirigir al login
+    if (res.status === 401) { window.location.href = '/'; return; }
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error del servidor');
+    return data;
+}
+
+function toast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + (type === 'err' ? 'err' : 'ok');
+    setTimeout(function() { t.className = ''; }, 3000);
+}
+
+function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+        b.classList.remove('sidebar-active');
+        b.style.color = 'var(--text-muted)';
+    });
+    var section = document.getElementById(tabName);
+    if (section) section.classList.add('active');
+    evt.currentTarget.classList.add('sidebar-active');
+    evt.currentTarget.style.color = '#fff';
+    if (tabName === 'sistema')    cargarResumen();
+    if (tabName === 'usuarios')   cargarUsuarios();
+    if (tabName === 'sucursales') cargarSucursales();
+    if (tabName === 'categorias') cargarCategorias();
+    if (tabName === 'legal')      cargarLegal();
+}
+
+// SISTEMA
+async function cargarResumen() {
+    try {
+        var res = await api('/api/configuracion/resumen');
+        document.getElementById('kpi-productos').textContent   = res.totalProductos   || 0;
+        document.getElementById('kpi-proveedores').textContent = res.totalProveedores  || 0;
+        document.getElementById('kpi-usuarios').textContent    = res.totalUsuarios     || 0;
+        document.getElementById('kpi-bajostock').textContent   = res.productosBajoStock|| 0;
+        var cfg = await api('/api/configuracion');
+        if (cfg.Nombre)   document.getElementById('cfg-nombre').value   = cfg.Nombre;
+        if (cfg.Contacto) document.getElementById('cfg-contacto').value = cfg.Contacto;
+    } catch(e) { console.error(e); }
+}
+
+async function guardarConfiguracion() {
+    var Nombre   = document.getElementById('cfg-nombre').value.trim();
+    var Contacto = document.getElementById('cfg-contacto').value.trim();
+    if (!Nombre) return toast('El nombre es obligatorio', 'err');
+    try {
+        await api('/api/configuracion', 'PUT', { Nombre, Contacto });
+        toast('Configuracion guardada');
+    } catch(e) { toast(e.message, 'err'); }
+}
+
+// USUARIOS
+var _editUsuarioId = null;
+
+async function cargarUsuarios() {
+    var tbody = document.getElementById('tbodyUsuarios');
+    var usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+    var esDuena = (usuario.Rol === 'Duena' || usuario.Rol === 'Dueña');
+    document.getElementById('banner-solo-duena').style.display = esDuena ? 'none' : 'flex';
+    document.getElementById('btnNuevoUsuario').style.display   = esDuena ? '' : 'none';
+    try {
+        var usuarios = await api('/api/usuarios');
+        if (!usuarios.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10" style="color:var(--text-muted);">Sin usuarios registrados</td></tr>';
+            return;
+        }
+        tbody.innerHTML = usuarios.map(function(u) {
+            var iniciales = u.Nombre ? u.Nombre.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase() : '--';
+            var acciones = esDuena
+                ? '<button class="text-blue-400 p-2 rounded-xl mr-1" style="background:rgba(59,130,246,0.1);" data-edit-u="'+u.ID_usuario+'">&#9999;&#65039;</button>'
+                  + '<button class="text-red-400 p-2 rounded-xl" style="background:rgba(239,68,68,0.1);" data-del-u="'+u.ID_usuario+'">&#128465;&#65039;</button>'
+                : '<span style="color:#94a3b8;font-size:.75rem;">Solo lectura</span>';
+            return '<tr>'
+                + '<td style="color:var(--text-muted);font-weight:900;">#'+String(u.ID_usuario).padStart(3,'0')+'</td>'
+                + '<td><div style="display:flex;align-items:center;gap:10px;">'
+                  + '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:900;">'+iniciales+'</div>'
+                  + '<span style="font-weight:700;">'+u.Nombre+'</span></div></td>'
+                + '<td style="font-size:.75rem;text-transform:uppercase;color:var(--accent);">'+u.Rol+'</td>'
+                + '<td style="color:var(--text-muted);">'+u.Correo+'</td>'
+                + '<td style="text-align:right;">'+acciones+'</td>'
+                + '</tr>';
+        }).join('');
+        tbody.addEventListener('click', function(e) {
+            var btnEdit = e.target.closest('[data-edit-u]');
+            var btnDel  = e.target.closest('[data-del-u]');
+            if (btnEdit) {
+                var uid = btnEdit.dataset.editU;
+                var u = usuarios.find(function(x){return x.ID_usuario == uid;});
+                if (u) editarUsuario(u.ID_usuario, u.Nombre, u.Rol, u.Correo);
+            }
+            if (btnDel) eliminarUsuario(btnDel.dataset.delU);
+        }, { once: true });
+    } catch(e) { toast('Error cargando usuarios: '+e.message,'err'); }
+}
+
+async function abrirModalUsuario() {
+    // Verificar límite de usuarios
+    try {
+        var lista = await api('/api/usuarios');
+        if (lista.length >= 10) {
+            toast('Límite alcanzado: no se pueden registrar más de 10 usuarios','err');
+            return;
+        }
+    } catch(e) {
+        if (e.message && e.message.includes('autenticado')) { window.location.href = '/'; return; }
+        toast('Error verificando usuarios: ' + e.message, 'err');
+        return;
+    }
+    _editUsuarioId = null;
+    document.getElementById('modalUsuarioTitle').textContent = 'Nuevo Usuario';
+    document.getElementById('btnGuardarUsuario').textContent = 'Registrar';
+    document.getElementById('campoPassword').style.display   = 'block';
+    ['u-id','u-nombre','u-correo','u-pass'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('u-rol').value = 'Administrativo';
+    abrirModal('modalUsuario');
+}
+
+function editarUsuario(id, nombre, rol, correo) {
+    _editUsuarioId = id;
+    document.getElementById('modalUsuarioTitle').textContent = 'Editar Usuario';
+    document.getElementById('btnGuardarUsuario').textContent = 'Actualizar';
+    document.getElementById('campoPassword').style.display   = 'none';
+    document.getElementById('u-id').value     = id;
+    document.getElementById('u-nombre').value = nombre;
+    document.getElementById('u-correo').value = correo;
+    document.getElementById('u-rol').value    = rol;
+    abrirModal('modalUsuario');
+}
+
+async function guardarUsuario() {
+    var Nombre = document.getElementById('u-nombre').value.trim();
+    var Correo = document.getElementById('u-correo').value.trim();
+    var Rol    = document.getElementById('u-rol').value;
+    var Pass   = document.getElementById('u-pass').value;
+    if (!Nombre || Nombre.length < 2) return toast('Nombre invalido (min 2 caracteres)','err');
+    if (!Correo) return toast('El correo es obligatorio','err');
+    if (Correo.length > 50) return toast('El correo no puede exceder 50 caracteres','err');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(Correo)) return toast('Formato de correo invalido','err');
+    if (!_editUsuarioId && (!Pass || Pass.length < 6)) return toast('Contrasena minimo 6 caracteres','err');
+    try {
+        var res = _editUsuarioId
+            ? await fetch('/api/usuarios/'+_editUsuarioId, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({Nombre,Rol,Correo})})
+            : await fetch('/api/usuarios/registrar',        {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({Nombre,Rol,Correo,contrasena_hash:Pass})});
+        var data = await res.json();
+        if (!res.ok) return toast(data.error || 'Error al guardar','err');
+        toast(_editUsuarioId ? 'Usuario actualizado' : 'Usuario registrado');
+        cerrarModal('modalUsuario');
+        cargarUsuarios();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function eliminarUsuario(id) {
+    if (!confirm('Eliminar este usuario?')) return;
+    try {
+        var res  = await fetch('/api/usuarios/'+id, {method:'DELETE'});
+        var data = await res.json();
+        if (!res.ok) return toast(data.error || 'No se pudo eliminar','err');
+        toast('Usuario eliminado');
+        cargarUsuarios();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+// SUCURSALES
+var _editSucursalId = null;
+
+async function cargarSucursales() {
+    var cont = document.getElementById('listaSucursales');
+    try {
+        var suc = await api('/api/sucursales');
+        if (!suc.length) { cont.innerHTML = '<div class="glass-card rounded-3xl p-8 text-center" style="color:var(--text-muted);">Sin sucursales registradas</div>'; return; }
+        cont.innerHTML = suc.map(function(s) {
+            return '<div class="glass-card rounded-3xl p-8">'
+                + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">'
+                  + '<div><h4 style="font-weight:900;font-size:1.1rem;color:#1e293b;">'+s.Nombre+'</h4>'
+                  + '<p style="font-size:.85rem;color:var(--text-muted);margin-top:4px;">Tel: '+(s.Contacto||'Sin contacto')+'</p></div>'
+                  + '<span style="font-size:.7rem;font-weight:900;color:var(--accent);background:rgba(45,106,173,0.1);padding:4px 10px;border-radius:999px;">#'+s.ID_sucursal+'</span>'
+                + '</div>'
+                + '<div style="display:flex;gap:8px;margin-top:1rem;">'
+                  + '<button onclick="editarSucursal('+s.ID_sucursal+',\''+s.Nombre.replace(/'/g,'')+'\',\''+(s.Contacto||'').replace(/'/g,'')+'\')" style="flex:1;padding:8px;background:rgba(59,130,246,0.1);color:#3b82f6;border:none;border-radius:.75rem;font-weight:900;font-size:.75rem;cursor:pointer;">Editar</button>'
+                  + '<button onclick="eliminarSucursal('+s.ID_sucursal+')" style="flex:1;padding:8px;background:rgba(239,68,68,0.1);color:#ef4444;border:none;border-radius:.75rem;font-weight:900;font-size:.75rem;cursor:pointer;">Eliminar</button>'
+                + '</div></div>';
+        }).join('');
+    } catch(e) { toast('Error cargando sucursales: '+e.message,'err'); }
+}
+
+function abrirModalSucursal() {
+    _editSucursalId = null;
+    document.getElementById('modalSucursalTitle').textContent = 'Nueva Sucursal';
+    document.getElementById('s-id').value = '';
+    document.getElementById('s-nombre').value = '';
+    document.getElementById('s-contacto').value = '';
+    abrirModal('modalSucursal');
+}
+
+function editarSucursal(id, nombre, contacto) {
+    _editSucursalId = id;
+    document.getElementById('modalSucursalTitle').textContent = 'Editar Sucursal';
+    document.getElementById('s-id').value       = id;
+    document.getElementById('s-nombre').value   = nombre;
+    document.getElementById('s-contacto').value = contacto;
+    abrirModal('modalSucursal');
+}
+
+async function guardarSucursal() {
+    var Nombre   = document.getElementById('s-nombre').value.trim();
+    var Contacto = document.getElementById('s-contacto').value.trim();
+    if (!Nombre) return toast('El nombre es obligatorio','err');
+    try {
+        if (_editSucursalId) { await api('/api/sucursales/'+_editSucursalId,'PUT',{Nombre,Contacto}); toast('Sucursal actualizada'); }
+        else                 { await api('/api/sucursales/registrar','POST',{Nombre,Contacto});       toast('Sucursal registrada'); }
+        cerrarModal('modalSucursal'); cargarSucursales();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function eliminarSucursal(id) {
+    if (!confirm('Eliminar esta sucursal?')) return;
+    try { await api('/api/sucursales/'+id,'DELETE'); toast('Sucursal eliminada'); cargarSucursales(); }
+    catch(e) { toast('No se puede eliminar: '+e.message,'err'); }
+}
+
+// CATEGORIAS
+var _editCategoriaId = null;
+
+async function cargarCategorias() {
+    var tbody = document.getElementById('tbodyCategorías');
+    try {
+        var cats = await api('/api/categorias');
+        if (!cats.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-10" style="color:var(--text-muted);">Sin categorías</td></tr>'; return; }
+        tbody.innerHTML = cats.map(function(c) {
+            return '<tr>'
+                + '<td style="color:var(--text-muted);font-weight:900;">#'+c.ID_categoría+'</td>'
+                + '<td style="font-weight:700;">'+c.Nombre_categoria+'</td>'
+                + '<td style="color:var(--text-muted);">'+(c.Descripcion||'--')+'</td>'
+                + '<td style="text-align:right;">'
+                  + '<button onclick="editarCategoría('+c.ID_categoría+',\''+c.Nombre_categoria.replace(/'/g,'')+'\',\''+(c.Descripcion||'').replace(/'/g,'')+'\')" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:none;padding:6px 10px;border-radius:.75rem;font-weight:900;font-size:.75rem;cursor:pointer;margin-right:4px;">Editar</button>'
+                  + '<button onclick="eliminarCategoría('+c.ID_categoría+')" style="background:rgba(239,68,68,0.1);color:#ef4444;border:none;padding:6px 10px;border-radius:.75rem;font-weight:900;font-size:.75rem;cursor:pointer;">Eliminar</button>'
+                + '</td></tr>';
+        }).join('');
+    } catch(e) { toast('Error cargando categorías: '+e.message,'err'); }
+}
+
+function abrirModalCategoría() {
+    _editCategoriaId = null;
+    document.getElementById('modalCategoriaTitle').textContent = 'Nueva Categoría';
+    document.getElementById('c-id').value = '';
+    document.getElementById('c-nombre').value = '';
+    document.getElementById('c-desc').value = '';
+    abrirModal('modalCategoría');
+}
+
+function editarCategoría(id, nombre, desc) {
+    _editCategoriaId = id;
+    document.getElementById('modalCategoriaTitle').textContent = 'Editar Categoría';
+    document.getElementById('c-id').value     = id;
+    document.getElementById('c-nombre').value = nombre;
+    document.getElementById('c-desc').value   = desc;
+    abrirModal('modalCategoría');
+}
+
+async function guardarCategoría() {
+    var Nombre_categoria = document.getElementById('c-nombre').value.trim();
+    var Descripcion      = document.getElementById('c-desc').value.trim();
+    if (!Nombre_categoria) return toast('El nombre es obligatorio','err');
+    try {
+        if (_editCategoriaId) { await api('/api/categorias/'+_editCategoriaId,'PUT',{Nombre_categoria,Descripcion}); toast('Categoría actualizada'); }
+        else                  { await api('/api/categorias/registrar','POST',{Nombre_categoria,Descripcion});        toast('Categoría registrada'); }
+        cerrarModal('modalCategoría'); cargarCategorias();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function eliminarCategoría(id) {
+    if (!confirm('Eliminar esta categoría? Verifica que no tenga productos asignados.')) return;
+    try { await api('/api/categorias/'+id,'DELETE'); toast('Categoría eliminada'); cargarCategorias(); }
+    catch(e) { toast('No se puede eliminar: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════
+// LEGAL — Politicas y Terminos
+// ═══════════════════════════════════════
+
+var _legalModo = { privacidad: 'editar', terminos: 'editar' };
+
+function _esDuenaActual() {
+    var usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+    return (usuario.Rol === 'Duena' || usuario.Rol === 'Dueña');
+}
+
+function cargarLegal() {
+    var esDuena = _esDuenaActual();
+
+    // Mostrar banner si no es dueña
+    var banner = document.getElementById('banner-solo-duena-legal');
+    if (banner) banner.style.display = esDuena ? 'none' : 'flex';
+
+    ['privacidad', 'terminos'].forEach(function(tipo) {
+        var guardado = localStorage.getItem('legal_' + tipo);
+        var fecha    = localStorage.getItem('legal_' + tipo + '_fecha');
+        if (guardado) {
+            document.getElementById('texto-' + tipo).value = guardado;
+            document.getElementById('badge-' + tipo).style.display = 'inline-block';
+            document.getElementById('fecha-' + tipo).textContent = 'Guardado: ' + (fecha || '');
+        }
+
+        // Restringir edición si no es dueña
+        var textarea   = document.getElementById('texto-' + tipo);
+        var btnGuardar = document.getElementById('btn-guardar-' + tipo);
+        var btnLimpiar = document.getElementById('btn-limpiar-' + tipo);
+
+        if (!esDuena) {
+            textarea.setAttribute('readonly', 'true');
+            textarea.style.background   = '#f1f5f9';
+            textarea.style.cursor       = 'not-allowed';
+            textarea.style.color        = '#94a3b8';
+            if (btnGuardar) { btnGuardar.style.display = 'none'; }
+            if (btnLimpiar) { btnLimpiar.style.display = 'none'; }
+        } else {
+            textarea.removeAttribute('readonly');
+            textarea.style.background   = '';
+            textarea.style.cursor       = '';
+            textarea.style.color        = '';
+            if (btnGuardar) { btnGuardar.style.display = ''; }
+            if (btnLimpiar) { btnLimpiar.style.display = ''; }
+        }
+    });
+}
+
+function guardarLegal(tipo) {
+    if (!_esDuenaActual()) return toast('Solo la Dueña puede guardar documentos legales', 'err');
+    var texto = document.getElementById('texto-' + tipo).value.trim();
+    if (!texto) return toast('Escribe o pega el contenido antes de guardar', 'err');
+    var ahora = new Date().toLocaleString('es-MX', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    localStorage.setItem('legal_' + tipo, texto);
+    localStorage.setItem('legal_' + tipo + '_fecha', ahora);
+    document.getElementById('badge-' + tipo).style.display = 'inline-block';
+    document.getElementById('fecha-' + tipo).textContent = 'Guardado: ' + ahora;
+    toast(tipo === 'privacidad' ? 'Politicas de Privacidad guardadas' : 'Terminos y Condiciones guardados');
+}
+
+function toggleModo(tipo) {
+    var modoActual = _legalModo[tipo];
+    var textarea   = document.getElementById('texto-' + tipo);
+    var preview    = document.getElementById('preview-' + tipo);
+    var btn        = document.getElementById('btn-modo-' + tipo);
+
+    if (modoActual === 'editar') {
+        // Pasar a vista previa
+        var texto = textarea.value || '(Sin contenido todavia)';
+        preview.textContent = texto;
+        textarea.style.display = 'none';
+        preview.classList.add('visible');
+        btn.innerHTML = '&#9998; Editar';
+        _legalModo[tipo] = 'preview';
+    } else {
+        // Volver a editar
+        textarea.style.display = '';
+        preview.classList.remove('visible');
+        btn.innerHTML = '&#128065; Vista previa';
+        _legalModo[tipo] = 'editar';
+    }
+}
+
+function copiarTexto(tipo) {
+    var texto = document.getElementById('texto-' + tipo).value;
+    if (!texto) return toast('No hay texto para copiar', 'err');
+    navigator.clipboard.writeText(texto).then(function() {
+        toast('Texto copiado al portapapeles');
+    }).catch(function() {
+        toast('No se pudo copiar automaticamente', 'err');
+    });
+}
+
+function limpiarTexto(tipo) {
+    if (!_esDuenaActual()) return toast('Solo la Dueña puede limpiar documentos legales', 'err');
+    if (!confirm('Borrar todo el contenido de ' + (tipo === 'privacidad' ? 'Politicas de Privacidad' : 'Terminos y Condiciones') + '?')) return;
+    document.getElementById('texto-' + tipo).value = '';
+    document.getElementById('preview-' + tipo).textContent = '';
+    localStorage.removeItem('legal_' + tipo);
+    localStorage.removeItem('legal_' + tipo + '_fecha');
+    document.getElementById('badge-' + tipo).style.display = 'none';
+    document.getElementById('fecha-' + tipo).textContent = 'Sin guardar';
+    // Asegurar modo editar
+    if (_legalModo[tipo] === 'preview') toggleModo(tipo);
+    toast('Contenido eliminado');
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+    var usuario = JSON.parse(sessionStorage.getItem('usuario') || '{}');
+    if (usuario.Nombre) {
+        var iniciales = usuario.Nombre.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+        document.getElementById('user-avatar').textContent = iniciales;
+        document.getElementById('user-nombre').textContent = usuario.Nombre;
+    }
+    cargarResumen();
+});
+</script>
+
+<!-- CAMPANA NOTIFICACIONES -->
+<div id="notif-fab" onclick="window.location.href='/notificaciones'"
+     style="position:fixed;bottom:2rem;right:2rem;z-index:9990;width:56px;height:56px;border-radius:50%;cursor:pointer;
+            background:var(--accent2);color:#fff;display:flex;align-items:center;justify-content:center;
+            font-size:22px;box-shadow:0 6px 20px rgba(13,148,136,0.45);transition:transform .2s,box-shadow .2s;"
+     onmouseover="this.style.transform='scale(1.12)'"
+     onmouseout="this.style.transform='scale(1)'"
+     title="Notificaciones">
+  &#128276;
+  <span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;
+        border-radius:50%;min-width:20px;height:20px;font-size:11px;font-weight:900;line-height:20px;
+        text-align:center;padding:0 4px;border:2px solid #f8fafc;"></span>
+</div>
+<script>
+async function actualizarBadgeNotif() {
+    try {
+        var r = await fetch('/api/notificaciones');
+        var d = await r.json();
+        var b = document.getElementById('notif-badge');
+        if (d.total > 0) { b.textContent = d.total > 99 ? '99+' : d.total; b.style.display = 'block'; }
+        else { b.style.display = 'none'; }
+    } catch(e) {}
+}
+actualizarBadgeNotif();
+setInterval(actualizarBadgeNotif, 30000);
+</script>
+</body>
+</html>
